@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">KeySdk-Android-Sample</string>
+
+    <string name="booking_ref">Booking Reference</string>
+    <string name="phone_num">Phone No</string>
+    <string name="login">Login</string>
+
+
+    <string name="booking_time_not_started">Booking Time Not Started</string>
+    <string name="invalid_booking_info">Invalid booking information</string>
+    <string name="booking_session_expired">Your Booking session has ended</string>
+    <string name="no_internet">No Internet connection</string>
+
+    <string name="bt_enabled">BT enabled</string>
+    <string name="bt_not_enabled">BT not enabled</string>
+
+
+    <string name="title_location_permission">Location Permission</string>
+    <string name="text_location_permission">To Continue, Please Allow App to Access Location</string>
+    <string name="ok">OK</string>
+    <string name="permission_granted">Permission granted</string>
+    <string name="permission_not_granted">Permission not granted</string>
+
+
+    <string name="dialog_location_enable_title">To continue, please enable location services</string>
+    <string name="dialog_location_enable_yes">Enable</string>
+    <string name="dialog_location_enable_no">Cancel</string>
+
+    <string name="lock">lock</string>
+    <string name="unlock">unlock</string>
+    <string name="connect">Connect</string>
+
+</resources>
