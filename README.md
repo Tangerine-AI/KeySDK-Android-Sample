@@ -97,3 +97,49 @@ Disconnect the device using the following API.
 ```
 KeySdk.disconnect(keyListener);
 ```
+
+#### Error handling
+
+There are several error scenarios come when booking validation happens or while executing the command. User has to pass ``` KeyListener ``` object to handle error case.
+
+Please find below list of errors that can occur during the booking validation.
+
+1. ``` KeyConstants.ERROR_BT_NOT_ENABLED ```  :  This error occurs in case when user has not enabled the bluetooth.
+2. ``` KeyConstants.ERROR_BT_NOT_AVAILABLE ```  :  This error occurs in case when device does not support bluetooth.
+3. ``` KeyConstants.ERROR_LOCATION_NOT_ENABLED ``` : This error occurs in case when user has not enabled the Location.
+4. ``` KeyConstants.ERROR_LOCATION_PERMISSION_NOT_GRATED ``` : This error occurs in case when user has not granted Location permission.
+5. ``` KeyConstants.ERROR_NO_INTERNET ``` : This error occurs while validation of booking (``` validateBooking() ``` method) and internet is not there.
+6. ``` KeyConstants.ERROR_BOOKING_WILL_START ``` : This error occurs when booking information is valid but booking has not yet started.
+7. ``` KeyConstants.ERROR_BOOKING_EXPIRED ``` : This error occurs when booking is expired.
+6. ``` KeyConstants.ERROR_BOOKING_VALIDATION_FAILED ``` : This error occurs when booking information is invalid or there is timeout for validation request.
+9. ``` KeyConstants.ERROR_BOOKING_NOT_VALIDATED ``` : This error occurs when app tries to use connect / lock / unlock feature without validating the booking information. 
+10. ``` KeyConstants.ERROR_PERMISSION_DENIED_TO_CONNECT ``` : This error occurs when another app is already connected to vehicle/device.
+
+
+#### State information while connecting to the device or executing the lock/unlock feature
+
+Please find below list of state that can occur during the connection and execution of lock/unlock features.
+
+1. ``` KeyConstants.STATE_CONNECTING ```  :  App starts connecting to the device.
+2. ``` KeyConstants.STATE_CONNECTED ```  :  App is connected to device.
+3. ``` KeyConstants.STATE_DISCONNECTED ``` : App is disconnected to device because of range.
+4. ``` KeyConstants.STATE_BOOKING_INVALID ``` : App goes to this state when already validated booking is expired or device invalidates the booking information when try to execute the lock/unlock feature.
+5. ``` KeyConstants.STATE_BOOKING_VALID ``` : App goes to this state when booking is valid while executing the ``` validateBooking() ```
+6. ``` KeyConstants.STATE_CAR_NOT_FOUND ``` : When app is unable to connect to the device after ~25 seconds of time or app is not near to the device.
+7. ``` KeyConstants.ERROR_BOOKING_EXPIRED ``` : This error occurs when booking is expired.
+6. ``` KeyConstants.STATE_LOCKED ``` : When device is locked
+9. ``` KeyConstants.STATE_UNLOCKED ``` : When device is unlocked 
+
+
+#### Exception information while connecting to the device or executing the lock/unlock feature
+
+1. ``` KeyConstants.EXCEPTION_SDK_NOT_INIT ```  :  When SDK is not initialised.
+2. ``` KeyConstants.EXCEPTION_KEY_LISTENER ```  :  When ``` KeyListener ``` is null.
+3. ``` KeyConstants.EXCEPTION_CONTEXT ```  :  When ``` Context ``` is null.
+4. ``` KeyConstants.EXCEPTION_BOOKING_ID ```  :  When ``` bookingId ``` passed is null or empty while ``` validateBooking() ```.
+5. ``` KeyConstants.EXCEPTION_PHONE_NUM ```  :  When ``` phoneNum ``` passed is null or empty while ``` validateBooking() ```.
+5. ``` KeyConstants.EXCEPTION_NOT_AUTHENTICATED ```  :  When booking is not validated and try to execute ``` connect() ``` , ``` lock() ``` or ``` unlock() ```
+5. ``` KeyConstants.EXCEPTION_NOT_CONNECTED ```  :  When app is not connected to device and try to execute the ``` lock() ``` or ``` unlock() ```.
+
+
+
