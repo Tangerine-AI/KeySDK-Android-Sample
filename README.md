@@ -141,5 +141,10 @@ Please find below list of state that can occur during the connection and executi
 5. ``` KeyConstants.EXCEPTION_NOT_AUTHENTICATED ```  :  When booking is not validated and try to execute ``` connect() ``` , ``` lock() ``` or ``` unlock() ```
 5. ``` KeyConstants.EXCEPTION_NOT_CONNECTED ```  :  When app is not connected to device and try to execute the ``` lock() ``` or ``` unlock() ```.
 
+#### Note
+1. We recommend to validate the booking for the first time and then save the booking information for further usage rather than validating every time you connect to the device.
+2. The sequence of usage is to ```validateBooking()``` -> save booking -> ```connect()``` -> ```lock()``` / ```unlock()```. Once the booking is validated you can skip ```validateBooking()``` until you get invalid booking error.
+3. ```lock()``` / ```unlock()``` this can be used only after ```connect()``` gets successful through ```KeyConstants.STATE_CONNECTED```.
 
+For more detailed implementation please refer the sample app code.
 
