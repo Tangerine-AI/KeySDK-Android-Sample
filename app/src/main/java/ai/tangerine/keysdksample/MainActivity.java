@@ -1,5 +1,7 @@
 package ai.tangerine.keysdksample;
 
+import ai.tangerine.keysdk.KeySdkIllegalArgumentException;
+import ai.tangerine.keysdk.KeySdkIllegalStateException;
 import android.Manifest;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
@@ -33,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     private AppCompatButton btnLock;
     private AppCompatButton btnUnlock;
     private AppCompatButton btnConnect;
+    private AppCompatButton btnDisconnect;
+    private AppCompatButton btnLogout;
     private static final String TAG = "MainActivity";
 
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
@@ -49,7 +53,8 @@ public class MainActivity extends AppCompatActivity {
         btnLock = findViewById(R.id.btn_lock);
         btnUnlock = findViewById(R.id.btn_unlock);
         btnConnect = findViewById(R.id.btn_connect);
-
+        btnDisconnect = findViewById(R.id.btn_disconnect);
+        btnLogout = findViewById(R.id.btn_logout);
 
         btnLock.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,10 +77,46 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        btnLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                logout();
+            }
+        });
+
+        btnDisconnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                disconnect();
+            }
+        });
+
         showLockBtn(false);
         showUnlockBtn(false);
-        showConnectBtn(true);
+        checkConnected();
 
+    }
+
+    private void checkConnected() {
+        // todo check for already connected to avoid re-connect
+        if(KeySdk.isConnected()) {
+            showConnectBtn(false);
+            showDisconnectBtn(true);
+            int state = KeySdk.getLastLockStatus();
+            switch (state) {
+                case KeyConstants.STATE_LOCKED:
+                    showLockBtn(false);
+                    showUnlockBtn(true);
+                    break;
+                case KeyConstants.STATE_UNLOCKED:
+                    showLockBtn(true);
+                    showUnlockBtn(false);
+                    break;
+            }
+        } else {
+            showConnectBtn(true);
+            showDisconnectBtn(false);
+        }
     }
 
     private void connect() {
@@ -83,9 +124,13 @@ public class MainActivity extends AppCompatActivity {
         showProgressBar(true);
         try {
             KeySdk.connect(keyListener);
-        } catch( Exception e) {
-            errorToast(e.getMessage());
+        } catch (KeySdkIllegalStateException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
             redirectToLogin();
+        } catch (KeySdkIllegalArgumentException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -94,9 +139,18 @@ public class MainActivity extends AppCompatActivity {
         showProgressBar(true);
         try {
             KeySdk.lock(keyListener);
-        } catch(Exception e) {
+        } catch (KeySdkIllegalArgumentException e) {
             e.printStackTrace();
-            connect();
+        } catch (KeySdkIllegalStateException e) {
+            e.printStackTrace();
+            switch(e.getMessage()) {
+                case KeyConstants.EXCEPTION_NOT_AUTHENTICATED:
+                    redirectToLogin();
+                    break;
+                case KeyConstants.EXCEPTION_NOT_CONNECTED:
+                    connect();
+                    break;
+            }
         }
     }
 
@@ -105,17 +159,41 @@ public class MainActivity extends AppCompatActivity {
         showProgressBar(true);
         try {
             KeySdk.unlock(keyListener);
-        } catch(Exception e) {
+        } catch (KeySdkIllegalArgumentException e) {
             e.printStackTrace();
-            connect();
+        } catch (KeySdkIllegalStateException e) {
+            e.printStackTrace();
+            switch(e.getMessage()) {
+                case KeyConstants.EXCEPTION_NOT_AUTHENTICATED:
+                    redirectToLogin();
+                    break;
+                case KeyConstants.EXCEPTION_NOT_CONNECTED:
+                    connect();
+                    break;
+            }
         }
     }
 
-    @Override
-    public void onBackPressed() {
+    private void logout() {
+        try {
+            KeySdk.logout(keyListener);
+            redirectToLogin();
+        } catch (KeySdkIllegalArgumentException | KeySdkIllegalStateException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void disconnect() {
         // todo Step-7
-        KeySdk.disconnect(keyListener);
-        super.onBackPressed();
+        try {
+            KeySdk.disconnect(keyListener);
+        } catch (KeySdkIllegalStateException | KeySdkIllegalArgumentException e) {
+            e.printStackTrace();
+        }
+
+        showProgressBar(false);
+        showConnectBtn(true);
+        showDisconnectBtn(false);
     }
 
     KeyListener keyListener = new KeyListener() {
@@ -125,7 +203,9 @@ public class MainActivity extends AppCompatActivity {
             Log.i(TAG, "onStateChanged: " + state + ":" + message);
             switch (state) {
                 case KeyConstants.STATE_CONNECTED:
+                    showProgressBar(false);
                     showConnectBtn(false);
+                    showDisconnectBtn(true);
                     break;
                 case KeyConstants.STATE_CAR_NOT_FOUND:
                     showProgressBar(false);
@@ -138,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
                     showProgressBar(false);
                     errorToast(message);
                     showConnectBtn(true);
+                    showDisconnectBtn(false);
                     break;
                 case KeyConstants.STATE_BOOKING_VALID:
                     break;
@@ -218,8 +299,17 @@ public class MainActivity extends AppCompatActivity {
         btnConnect.setClickable(show);
     }
 
+    private void showDisconnectBtn(boolean show) {
+        btnDisconnect.setEnabled(show);
+        btnDisconnect.setClickable(show);
+    }
+
     private void redirectToLogin() {
-        KeySdk.disconnect(keyListener);
+        try {
+            KeySdk.disconnect(keyListener);
+        } catch (KeySdkIllegalStateException | KeySdkIllegalArgumentException e) {
+            e.printStackTrace();
+        }
         finish();
         Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
         startActivity(intent);

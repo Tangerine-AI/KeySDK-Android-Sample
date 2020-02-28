@@ -1,8 +1,10 @@
 package ai.tangerine.keysdksample;
 
+import ai.tangerine.keysdk.KeySdkIllegalStateException;
 import android.app.Application;
 
 import ai.tangerine.keysdk.KeySdk;
+import android.util.Log;
 
 public class SampleApplication extends Application {
 
@@ -11,6 +13,10 @@ public class SampleApplication extends Application {
         super.onCreate();
 
         // todo step-3
-        KeySdk.init(getApplicationContext());
+        try {
+            KeySdk.init(getApplicationContext());
+        } catch (KeySdkIllegalStateException e) {
+            e.printStackTrace();
+        }
     }
 }

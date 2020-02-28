@@ -33,7 +33,7 @@ Open `build.gradle` inside module that you want to use the library and simply ad
 
 ```
 dependencies {
-   implementation 'ai.tangerine:keysdk:1.0.0-beta01'
+   implementation 'ai.tangerine:keysdk:1.0.0-beta03'
 }
 ```
 
@@ -47,7 +47,11 @@ public class SampleApplication extends Application {
    public void onCreate() {
        super.onCreate();
        // todo step-3
-       KeySdk.init(getApplicationContext());
+       try {
+            KeySdk.init(getApplicationContext());
+        } catch (KeySdkIllegalStateException e) {
+            e.printStackTrace();
+        }
    }
 }
 ```
@@ -56,7 +60,55 @@ public class SampleApplication extends Application {
 Validate your booking reference using the following method:
 
 ```
-KeySdk.validateBooking(bookingRef, phoneNum, keyListener);
+        try {
+            KeySdk.validateBooking(bookingRef, phoneNum, new KeyListener() {
+                @Override
+                public void onStateChanged(int i) {
+    
+                }
+    
+                @Override
+                public void onAccessError(int i) {
+                    showProgressBar(false);
+                    switch (i) {
+                        case KeyConstants.ERROR_BT_NOT_ENABLED:
+                            showBtEnableDialog();
+                            break;
+                        case KeyConstants.ERROR_LOCATION_NOT_ENABLED:
+                            showLocationEnableDialog();
+                            break;
+                        case KeyConstants.ERROR_LOCATION_PERMISSION_NOT_GRATED:
+                            askForPermission();
+                            break;
+                        case KeyConstants.ERROR_BOOKING_WILL_START:
+                            errorToast(R.string.booking_time_not_started);
+                            break;
+                        case KeyConstants.ERROR_BOOKING_VALIDATION_FAILED:
+                            errorToast(R.string.invalid_booking_info);
+                            break;
+                        case KeyConstants.ERROR_BOOKING_EXPIRED:
+                            errorToast(R.string.booking_session_expired);
+                            break;
+                        case KeyConstants.ERROR_NO_INTERNET:
+                            errorToast(R.string.no_internet);
+                            break;
+                    }
+                }
+    
+                @Override
+                public void onBookingInfo(String s, long l, long l1) {
+                    showProgressBar(false);
+                    Log.i(TAG, "onBookingInfo:" + s);
+                    Log.i(TAG, "start time:" + l);
+                    Log.i(TAG, "end time:" + l1);
+                    // validation successful go for connection 
+                    connect();
+                }
+            });
+        } catch (KeySdkIllegalStateException | KeySdkIllegalArgumentException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
 ```
 
 #### Step 5
@@ -64,7 +116,16 @@ KeySdk.validateBooking(bookingRef, phoneNum, keyListener);
 Connect to the device once validation is successful using the following method.
 
 ```
-KeySdk.connect(keyListener);
+        try {
+            KeySdk.connect(keyListener);
+        } catch (KeySdkIllegalStateException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            redirectToLogin();
+        } catch (KeySdkIllegalArgumentException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
 ```
 
 #### Step 6
@@ -73,30 +134,109 @@ Lock and unlock the vehicle using the following APIs. You need to be connected b
 Use step 5 to connect before using the lock and unlock API.
 ```
 
-try {
-   KeySdk.lock(keyListener);
-} catch(Exception e) {
-   e.printStackTrace();
-   KeySdk.connect(keyListener);
-}
+        try {
+            KeySdk.lock(keyListener);
+        } catch (KeySdkIllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (KeySdkIllegalStateException e) {
+            e.printStackTrace();
+            switch(e.getMessage()) {
+                case KeyConstants.EXCEPTION_NOT_AUTHENTICATED:
+                    redirectToLogin();
+                    break;
+                case KeyConstants.EXCEPTION_NOT_CONNECTED:
+                    connect();
+                    break;
+            }
+        }
 ```
 
 ```
 
-try {
-   KeySdk.unlock(keyListener);
-} catch(Exception e) {
-   e.printStackTrace();
-   KeySdk.connect(keyListener);
-}
+        try {
+            KeySdk.unlock(keyListener);
+        } catch (KeySdkIllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (KeySdkIllegalStateException e) {
+            e.printStackTrace();
+            switch(e.getMessage()) {
+                case KeyConstants.EXCEPTION_NOT_AUTHENTICATED:
+                    redirectToLogin();
+                    break;
+                case KeyConstants.EXCEPTION_NOT_CONNECTED:
+                    connect();
+                    break;
+            }
+        }
 ```
 #### Step 7
 
 Disconnect the device using the following API.
 
 ```
-KeySdk.disconnect(keyListener);
+        try {
+            KeySdk.disconnect(keyListener);
+        } catch (KeySdkIllegalStateException | KeySdkIllegalArgumentException e) {
+            e.printStackTrace();
+        }
 ```
+
+#### Step 8
+
+logout by clearing existing booking information to start fresh.
+
+```
+        try {
+            KeySdk.logout(keyListener);
+        } catch (KeySdkIllegalStateException | KeySdkIllegalArgumentException e) {
+            e.printStackTrace();
+        }
+```
+
+#### Get BT connection state
+
+you can check if device is already connected with the Jido Sense device by using below api
+
+```
+        
+            boolean state = KeySdk.isConnected();
+        
+```
+
+#### Get last saved state
+
+you can get the last saved state of car by calling this api. If not state is saved in sdk then it will return ``` KeyConstants.STATE_LOCKED ```
+
+```
+        
+            int state = KeySdk.getLastLockStatus();
+        
+```
+
+#### Validation Step
+ 
+Please find sample api as below for checking if booking is been validated or not. 
+Sample app decides whether to go to main screen or login screen based on booking validation.
+User don't have to validate the booking information again and again until it expires or modified.
+This will return true once ``` KeySdk.validateBooking(); ``` is successful.
+```
+    KeySdk.isValidationDone();
+```
+
+```
+        if (KeySdk.isValidationDone()) {
+            // go for connection
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+            finish();
+        } else {
+             // go for login
+             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+             startActivity(intent);
+             finish();   
+        }
+```
+
 
 #### Error handling
 

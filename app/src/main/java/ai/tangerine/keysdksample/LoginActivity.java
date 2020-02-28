@@ -1,5 +1,7 @@
 package ai.tangerine.keysdksample;
 
+import ai.tangerine.keysdk.KeySdkIllegalArgumentException;
+import ai.tangerine.keysdk.KeySdkIllegalStateException;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
@@ -64,49 +66,55 @@ public class LoginActivity extends AppCompatActivity {
         // todo step-4
         //validates the booking information. Requires location permission to execute this method.
         // To connect to bluetooth and discover the nearby bluetooth devices location permission is required.
-        KeySdk.validateBooking(bookingRef, phoneNum, new KeyListener() {
-            @Override
-            public void onStateChanged(int i) {
+        try {
+            KeySdk.validateBooking(bookingRef, phoneNum, new KeyListener() {
+                @Override
+                public void onStateChanged(int i) {
 
-            }
-
-            @Override
-            public void onAccessError(int i) {
-                showProgressBar(false);
-                switch (i) {
-                    case KeyConstants.ERROR_BT_NOT_ENABLED:
-                        showBtEnableDialog();
-                        break;
-                    case KeyConstants.ERROR_LOCATION_NOT_ENABLED:
-                        showLocationEnableDialog();
-                        break;
-                    case KeyConstants.ERROR_LOCATION_PERMISSION_NOT_GRATED:
-                        askForPermission();
-                        break;
-                    case KeyConstants.ERROR_BOOKING_WILL_START:
-                        errorToast(R.string.booking_time_not_started);
-                        break;
-                    case KeyConstants.ERROR_BOOKING_VALIDATION_FAILED:
-                        errorToast(R.string.invalid_booking_info);
-                        break;
-                    case KeyConstants.ERROR_BOOKING_EXPIRED:
-                        errorToast(R.string.booking_session_expired);
-                        break;
-                    case KeyConstants.ERROR_NO_INTERNET:
-                        errorToast(R.string.no_internet);
-                        break;
                 }
-            }
 
-            @Override
-            public void onBookingInfo(String s, long l, long l1) {
-                showProgressBar(false);
-                Log.i(TAG, "onBookingInfo:" + s);
-                Log.i(TAG, "start time:" + l);
-                Log.i(TAG, "end time:" + l1);
-                connect();
-            }
-        });
+                @Override
+                public void onAccessError(int i) {
+                    showProgressBar(false);
+                    switch (i) {
+                        case KeyConstants.ERROR_BT_NOT_ENABLED:
+                            showBtEnableDialog();
+                            break;
+                        case KeyConstants.ERROR_LOCATION_NOT_ENABLED:
+                            showLocationEnableDialog();
+                            break;
+                        case KeyConstants.ERROR_LOCATION_PERMISSION_NOT_GRATED:
+                            askForPermission();
+                            break;
+                        case KeyConstants.ERROR_BOOKING_WILL_START:
+                            errorToast(R.string.booking_time_not_started);
+                            break;
+                        case KeyConstants.ERROR_BOOKING_VALIDATION_FAILED:
+                            errorToast(R.string.invalid_booking_info);
+                            break;
+                        case KeyConstants.ERROR_BOOKING_EXPIRED:
+                            errorToast(R.string.booking_session_expired);
+                            break;
+                        case KeyConstants.ERROR_NO_INTERNET:
+                            errorToast(R.string.no_internet);
+                            break;
+                    }
+                }
+
+                @Override
+                public void onBookingInfo(String s, long l, long l1) {
+                    showProgressBar(false);
+                    Log.i(TAG, "onBookingInfo:" + s);
+                    Log.i(TAG, "start time:" + l);
+                    Log.i(TAG, "end time:" + l1);
+                    // validation successful go for connection
+                    connect();
+                }
+            });
+        } catch (KeySdkIllegalStateException | KeySdkIllegalArgumentException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void errorToast(final @StringRes int res) {
