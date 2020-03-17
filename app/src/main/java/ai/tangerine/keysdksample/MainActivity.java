@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (KeySdkIllegalStateException e) {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-            redirectToLogin();
+            logout();
         } catch (KeySdkIllegalArgumentException e) {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
             switch(e.getMessage()) {
                 case KeyConstants.EXCEPTION_NOT_AUTHENTICATED:
-                    redirectToLogin();
+                    logout();
                     break;
                 case KeyConstants.EXCEPTION_NOT_CONNECTED:
                     connect();
@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
             switch(e.getMessage()) {
                 case KeyConstants.EXCEPTION_NOT_AUTHENTICATED:
-                    redirectToLogin();
+                    logout();
                     break;
                 case KeyConstants.EXCEPTION_NOT_CONNECTED:
                     connect();
@@ -225,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
                 case KeyConstants.STATE_BOOKING_INVALID:
                     showProgressBar(false);
                     errorToast(message);
-                    redirectToLogin();
+                    logout();
                     break;
                 case KeyConstants.STATE_LOCKED:
                     showProgressBar(false);
@@ -251,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
                 case KeyConstants.ERROR_PERMISSION_DENIED_TO_CONNECT:
                     showProgressBar(false);
                     errorToast(message);
-                    redirectToLogin();
+                    logout();
                     break;
                 case KeyConstants.ERROR_BT_NOT_ENABLED:
                     showBtEnableDialog();
@@ -267,10 +267,11 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case KeyConstants.ERROR_BOOKING_VALIDATION_FAILED:
                     errorToast(R.string.invalid_booking_info);
-                    redirectToLogin();
+                    logout();
                     break;
                 case KeyConstants.ERROR_BOOKING_EXPIRED:
                     errorToast(R.string.booking_session_expired);
+                    logout();
                     break;
                 case KeyConstants.ERROR_NO_INTERNET:
                     errorToast(R.string.no_internet);
