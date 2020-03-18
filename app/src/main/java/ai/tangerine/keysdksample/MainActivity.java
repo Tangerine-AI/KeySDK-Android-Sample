@@ -232,12 +232,14 @@ public class MainActivity extends AppCompatActivity {
                     errorToast(message);
                     showLockBtn(false);
                     showUnlockBtn(true);
+                    showConnectBtn(false);
                     break;
                 case KeyConstants.STATE_UNLOCKED:
                     showProgressBar(false);
                     errorToast(message);
                     showLockBtn(true);
                     showUnlockBtn(false);
+                    showConnectBtn(false);
                     break;
             }
         }
