@@ -306,11 +306,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void redirectToLogin() {
-        try {
-            KeySdk.disconnect(keyListener);
-        } catch (KeySdkIllegalStateException | KeySdkIllegalArgumentException e) {
-            e.printStackTrace();
-        }
         finish();
         Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
         startActivity(intent);

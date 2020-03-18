@@ -33,7 +33,7 @@ Open `build.gradle` inside module that you want to use the library and simply ad
 
 ```
 dependencies {
-   implementation 'ai.tangerine:keysdk:1.0.0-beta05'
+   implementation 'ai.tangerine:keysdk:1.0.0-beta07'
 }
 ```
 
