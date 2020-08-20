@@ -2,6 +2,7 @@ package ai.tangerine.keysdksample;
 
 import ai.tangerine.keysdk.KeySdkIllegalArgumentException;
 import ai.tangerine.keysdk.KeySdkIllegalStateException;
+import ai.tangerine.keysdk.model.KeyBookingInfo;
 import android.Manifest;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
@@ -23,6 +24,7 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -37,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private AppCompatButton btnConnect;
     private AppCompatButton btnDisconnect;
     private AppCompatButton btnLogout;
+    private AppCompatButton btnBookingInfo;
+    private AppCompatTextView txtBookingInfo;
     private static final String TAG = "MainActivity";
 
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
@@ -55,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
         btnConnect = findViewById(R.id.btn_connect);
         btnDisconnect = findViewById(R.id.btn_disconnect);
         btnLogout = findViewById(R.id.btn_logout);
+        btnBookingInfo = findViewById(R.id.btn_booking_info);
+        txtBookingInfo = findViewById(R.id.txt_booking_info);
 
         btnLock.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,10 +97,26 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        btnBookingInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getBookingInfo();
+            }
+        });
+
         showLockBtn(false);
         showUnlockBtn(false);
         checkConnected();
 
+    }
+
+    private void getBookingInfo() {
+        KeyBookingInfo keyBookingInfo = KeySdk.getCurrentBookingInfo();
+        if(keyBookingInfo != null) {
+            txtBookingInfo.setText(keyBookingInfo.toString());
+        } else {
+            txtBookingInfo.setText("null");
+        }
     }
 
     private void checkConnected() {

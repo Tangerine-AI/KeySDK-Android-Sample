@@ -193,6 +193,22 @@ logout by clearing existing booking information to start fresh.
         }
 ```
 
+#### Get Booking information
+
+you can get the booking information by using below api. it will return ```null``` if booking information is not there with the sdk. if sdk has the booking info then it will return the valid ```ai.tangerine.keysdk.model.KeyBookingInfo``` object.
+```KeyBookingInfo``` object contains Booking Reference, Start Time of booking in ms, End Time of booking in ms, Vehicle Number and Mobile Number used for booking.
+
+```
+        
+            KeyBookingInfo keyBookingInfo = KeySdk.getCurrentBookingInfo();
+            if(keyBookingInfo != null) {
+                  txtBookingInfo.setText(keyBookingInfo.toString());
+            } else {
+                  txtBookingInfo.setText("null");
+            }
+        
+```
+
 #### Get BT connection state
 
 you can check if device is already connected with the Jido Sense device by using below api

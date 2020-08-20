@@ -31,5 +31,6 @@
     <string name="connect">Connect</string>
     <string name="disconnect">Disconnect</string>
     <string name="logout">Logout</string>
+    <string name="booking_info">Get booking info</string>
 
 </resources>
