@@ -1,5 +1,8 @@
 package ai.tangerine.keysdksample;
 
+import ai.tangerine.keysdk.KeyConstants;
+import ai.tangerine.keysdk.KeyListener;
+import ai.tangerine.keysdk.KeySdk;
 import ai.tangerine.keysdk.KeySdkIllegalArgumentException;
 import ai.tangerine.keysdk.KeySdkIllegalStateException;
 import ai.tangerine.keysdk.model.KeyBookingInfo;
@@ -17,7 +20,6 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
@@ -27,10 +29,6 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
-import ai.tangerine.keysdk.KeyConstants;
-import ai.tangerine.keysdk.KeyListener;
-import ai.tangerine.keysdk.KeySdk;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -309,24 +307,44 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private void showLockBtn(boolean show) {
-        btnLock.setEnabled(show);
-        btnLock.setClickable(show);
+    private void showLockBtn(final boolean show) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                btnLock.setEnabled(show);
+                btnLock.setClickable(show);
+            }
+        });
     }
 
-    private void showUnlockBtn(boolean show) {
-        btnUnlock.setEnabled(show);
-        btnUnlock.setClickable(show);
+    private void showUnlockBtn(final boolean show) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                btnUnlock.setEnabled(show);
+                btnUnlock.setClickable(show);
+            }
+        });
     }
 
-    private void showConnectBtn(boolean show) {
-        btnConnect.setEnabled(show);
-        btnConnect.setClickable(show);
+    private void showConnectBtn(final boolean show) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                btnConnect.setEnabled(show);
+                btnConnect.setClickable(show);
+            }
+        });
     }
 
-    private void showDisconnectBtn(boolean show) {
-        btnDisconnect.setEnabled(show);
-        btnDisconnect.setClickable(show);
+    private void showDisconnectBtn(final boolean show) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                btnDisconnect.setEnabled(show);
+                btnDisconnect.setClickable(show);
+            }
+        });
     }
 
     private void redirectToLogin() {
@@ -459,7 +477,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), res, Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
     private void errorToast(final String res) {

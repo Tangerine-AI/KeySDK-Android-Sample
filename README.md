@@ -96,7 +96,7 @@ Validate your booking reference using the following method:
                 }
     
                 @Override
-                public void onBookingInfo(String s, long l, long l1) {
+                public void onBookingInfo(String carNumber, long startTime, long endTime) {
                     showProgressBar(false);
                     Log.i(TAG, "onBookingInfo:" + s);
                     Log.i(TAG, "start time:" + l);
