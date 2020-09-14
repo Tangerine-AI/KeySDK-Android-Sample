@@ -1,6 +1,5 @@
 package ai.tangerine.keysdksample;
 
-import ai.tangerine.keysdk.KeySdk;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,19 +16,14 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void init() {
-        if (KeySdk.isValidationDone()) {
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(intent);
-            finish();
-        } else {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                    startActivity(intent);
-                    finish();
-                }
-            }, SPLASH_PERIOD);
-        }
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        }, SPLASH_PERIOD);
     }
+
 }

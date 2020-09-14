@@ -5,58 +5,104 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="16dp"
-        tools:context=".LoginActivity">
+        tools:context=".LoginActivity"
+        >
 
 
     <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_add_booking"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:text="@string/add_booking"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            android:text="@string/connect"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+
+    <RelativeLayout
+            android:id="@+id/spinner_rl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:background="#FFFFFF"
+            android:padding="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_add_booking"
+            >
+        <androidx.appcompat.widget.AppCompatSpinner
+                android:id="@+id/spinner"
+                style="@style/Widget.AppCompat.DropDownItem.Spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+    </RelativeLayout>
+
+    <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_connect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_margin="30dp"
+            android:text="@string/connect"
             android:visibility="visible"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/spinner_rl"
+            />
 
     <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_disconnect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:text="@string/lock"
+            android:layout_margin="30dp"
+            android:text="@string/disconnect"
+            android:visibility="visible"
+            app:layout_constraintStart_toEndOf="@+id/btn_connect"
+            app:layout_constraintTop_toBottomOf="@+id/spinner_rl"
+            />
+
+    <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_lock"
-            android:layout_margin="30dp"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_connect"/>
-
-    <androidx.appcompat.widget.AppCompatButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:text="@string/lock"
             app:layout_constraintLeft_toLeftOf="parent"
-            android:text="@string/unlock"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_connect"
+            />
+
+    <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_unlock"
-            android:layout_margin="30dp"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_lock"/>
-
-    <androidx.appcompat.widget.AppCompatButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:text="@string/booking_info"
-            android:id="@+id/btn_booking_info"
             android:layout_margin="30dp"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_unlock"/>
+            android:text="@string/unlock"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btn_lock"
+            app:layout_constraintTop_toBottomOf="@+id/btn_connect"
+            />
+
+    <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_booking_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:text="@string/booking_info"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_unlock"
+            />
 
     <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/txt_booking_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="30dp"
             app:layout_constraintLeft_toLeftOf="parent"
-            android:id="@+id/txt_booking_info"
-            android:layout_margin="10dp"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_booking_info"/>
+            app:layout_constraintTop_toBottomOf="@+id/btn_booking_info"
+            />
 
     <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_logout"
@@ -64,21 +110,21 @@
             android:layout_height="wrap_content"
             android:layout_margin="30dp"
             android:text="@string/logout"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btn_booking_info"
+            app:layout_constraintTop_toBottomOf="@+id/btn_unlock"
             />
 
+
     <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_last_booking_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/disconnect"
-            android:id="@+id/btn_disconnect"
             android:layout_margin="30dp"
-            android:visibility="visible"
+            android:text="@string/last_booking_info"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/btn_logout"
-            app:layout_constraintRight_toRightOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

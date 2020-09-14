@@ -14,6 +14,10 @@
     <string name="bt_enabled">BT enabled</string>
     <string name="bt_not_enabled">BT not enabled</string>
 
+    <string name="booking_added">Booking added</string>
+    <string name="booking_add_fail">Booking add failed</string>
+    <string name="no_bookings">No Bookings</string>
+    <string name="bookings_count">%d bookings</string>
 
     <string name="title_location_permission">Location Permission</string>
     <string name="text_location_permission">To Continue, Please Allow App to Access Location</string>
@@ -26,11 +30,13 @@
     <string name="dialog_location_enable_yes">Enable</string>
     <string name="dialog_location_enable_no">Cancel</string>
 
+    <string name="add_booking">Add Booking</string>
     <string name="lock">lock</string>
     <string name="unlock">unlock</string>
     <string name="connect">Connect</string>
     <string name="disconnect">Disconnect</string>
-    <string name="logout">Logout</string>
+    <string name="logout">clear booking</string>
     <string name="booking_info">Get booking info</string>
+    <string name="last_booking_info">Last booking info</string>
 
 </resources>

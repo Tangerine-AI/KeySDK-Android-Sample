@@ -2,6 +2,7 @@ package ai.tangerine.keysdksample;
 
 import ai.tangerine.keysdk.KeySdkIllegalArgumentException;
 import ai.tangerine.keysdk.KeySdkIllegalStateException;
+import ai.tangerine.keysdk.model.KeyBookingInfo;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
@@ -69,12 +70,12 @@ public class LoginActivity extends AppCompatActivity {
         try {
             KeySdk.validateBooking(bookingRef, phoneNum, new KeyListener() {
                 @Override
-                public void onStateChanged(int i) {
+                public void onStateChanged(String bookingId, int i) {
 
                 }
 
                 @Override
-                public void onAccessError(int i) {
+                public void onAccessError(String bookingId, int i) {
                     showProgressBar(false);
                     switch (i) {
                         case KeyConstants.ERROR_BT_NOT_ENABLED:
@@ -102,17 +103,16 @@ public class LoginActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onBookingInfo(String s, long l, long l1) {
+                public void onBookingInfo(KeyBookingInfo keyBookingInfo) {
                     showProgressBar(false);
-                    Log.i(TAG, "onBookingInfo:" + s);
-                    Log.i(TAG, "start time:" + l);
-                    Log.i(TAG, "end time:" + l1);
+                    Log.i(TAG, "onBookingInfo:" + keyBookingInfo.toString());
                     // validation successful go for connection
                     connect();
                 }
             });
         } catch (KeySdkIllegalStateException | KeySdkIllegalArgumentException e) {
             e.printStackTrace();
+            showProgressBar(false);
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
@@ -242,8 +242,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void connect() {
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(intent);
+        setResult(RESULT_OK);
         finish();
     }
 

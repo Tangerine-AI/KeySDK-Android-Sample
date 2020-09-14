@@ -7,6 +7,7 @@ import ai.tangerine.keysdk.KeySdkIllegalArgumentException;
 import ai.tangerine.keysdk.KeySdkIllegalStateException;
 import ai.tangerine.keysdk.model.KeyBookingInfo;
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ActivityNotFoundException;
@@ -19,6 +20,8 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,24 +29,29 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
+    private AppCompatButton btnAddBooking;
     private AppCompatButton btnLock;
     private AppCompatButton btnUnlock;
     private AppCompatButton btnConnect;
     private AppCompatButton btnDisconnect;
     private AppCompatButton btnLogout;
     private AppCompatButton btnBookingInfo;
+    private AppCompatButton btnLastBookingInfo;
     private AppCompatTextView txtBookingInfo;
+    AppCompatSpinner spinner;
     private static final String TAG = "MainActivity";
 
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
-    private BluetoothAdapter mBluetoothAdapter;
     private final int REQUEST_ENABLE_BT = 1000;
+    public static final int REQ_LOGIN = 2000;
 
     private Dialog progressDialog;
 
@@ -52,13 +60,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        btnAddBooking = findViewById(R.id.btn_add_booking);
         btnLock = findViewById(R.id.btn_lock);
         btnUnlock = findViewById(R.id.btn_unlock);
         btnConnect = findViewById(R.id.btn_connect);
         btnDisconnect = findViewById(R.id.btn_disconnect);
         btnLogout = findViewById(R.id.btn_logout);
         btnBookingInfo = findViewById(R.id.btn_booking_info);
+        btnLastBookingInfo = findViewById(R.id.btn_last_booking_info);
         txtBookingInfo = findViewById(R.id.txt_booking_info);
+        spinner = findViewById(R.id.spinner);
 
         btnLock.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,14 +113,59 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        btnLastBookingInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getLastBookingInfo();
+            }
+        });
+
+        btnAddBooking.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivityForResult(intent, REQ_LOGIN);
+            }
+        });
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                disconnect();
+                getBookingInfo();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         showLockBtn(false);
         showUnlockBtn(false);
         checkConnected();
+        fetchBookings();
 
     }
 
     private void getBookingInfo() {
-        KeyBookingInfo keyBookingInfo = KeySdk.getCurrentBookingInfo();
+        KeyBookingInfo keyBookingInfo = KeySdk.getBookingInfo(getCurrentSpinnerItem());
+        if(keyBookingInfo != null) {
+            txtBookingInfo.setText(keyBookingInfo.toString());
+            //if(keyBookingInfo.lastLockState == KeyConstants.STATE_LOCKED) {
+            //    showLockBtn(false);
+            //    showUnlockBtn(true);
+            //} else {
+            //    showLockBtn(true);
+            //    showUnlockBtn(false);
+            //}
+        } else {
+            txtBookingInfo.setText("null");
+        }
+    }
+
+    private void getLastBookingInfo() {
+        KeyBookingInfo keyBookingInfo = KeySdk.getLastBookingInfo();
         if(keyBookingInfo != null) {
             txtBookingInfo.setText(keyBookingInfo.toString());
         } else {
@@ -117,12 +173,49 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void fetchBookings() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                HashMap<String, KeyBookingInfo> bookings = KeySdk.getAllBookings();
+                if (bookings != null && !bookings.isEmpty()) {
+                    showAllBtn(true);
+                    ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(MainActivity.this,
+                            android.R.layout.simple_spinner_item, android.R.id.text1);
+                    spinnerAdapter.setDropDownViewResource(
+                            android.R.layout.simple_spinner_dropdown_item);
+                    spinner.setAdapter(spinnerAdapter);
+                    for (String key : bookings.keySet()) {
+                        spinnerAdapter.add(key);
+                    }
+                    spinnerAdapter.notifyDataSetChanged();
+                    String message =
+                            String.format(getString(R.string.bookings_count), bookings.size());
+                    txtBookingInfo.setText(message);
+                } else {
+                    spinner.setAdapter(null);
+                    showAllBtn(false);
+                    txtBookingInfo.setText(R.string.no_bookings);
+                }
+            }
+        });
+    }
+
+    private String getCurrentSpinnerItem() {
+        Object selectedItem = spinner.getSelectedItem();
+        if(selectedItem != null) {
+            return spinner.getSelectedItem().toString();
+        }
+        return null;
+    }
+
     private void checkConnected() {
         // todo check for already connected to avoid re-connect
         if(KeySdk.isConnected()) {
             showConnectBtn(false);
             showDisconnectBtn(true);
-            int state = KeySdk.getLastLockStatus();
+            int state = KeySdk.getLastLockStatus(getCurrentSpinnerItem());
             switch (state) {
                 case KeyConstants.STATE_LOCKED:
                     showLockBtn(false);
@@ -139,29 +232,35 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private void connect() {
         // todo Step-5
         showProgressBar(true);
         try {
-            KeySdk.connect(keyListener);
+            KeySdk.connect(getCurrentSpinnerItem(), keyListener);
         } catch (KeySdkIllegalStateException e) {
+            showProgressBar(false);
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
             logout();
         } catch (KeySdkIllegalArgumentException e) {
+            showProgressBar(false);
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
+    @SuppressLint("MissingPermission")
     private void lock() {
         // todo Step-6.1
         showProgressBar(true);
         try {
             KeySdk.lock(keyListener);
         } catch (KeySdkIllegalArgumentException e) {
+            showProgressBar(false);
             e.printStackTrace();
         } catch (KeySdkIllegalStateException e) {
+            showProgressBar(false);
             e.printStackTrace();
             switch(e.getMessage()) {
                 case KeyConstants.EXCEPTION_NOT_AUTHENTICATED:
@@ -174,14 +273,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private void unlock() {
         // todo Step-6.2
         showProgressBar(true);
         try {
             KeySdk.unlock(keyListener);
         } catch (KeySdkIllegalArgumentException e) {
+            showProgressBar(false);
             e.printStackTrace();
         } catch (KeySdkIllegalStateException e) {
+            showProgressBar(false);
             e.printStackTrace();
             switch(e.getMessage()) {
                 case KeyConstants.EXCEPTION_NOT_AUTHENTICATED:
@@ -196,8 +298,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void logout() {
         try {
-            KeySdk.logout(keyListener);
-            redirectToLogin();
+            KeySdk.logout(getCurrentSpinnerItem(), keyListener);
+            fetchBookings();
         } catch (KeySdkIllegalArgumentException | KeySdkIllegalStateException e) {
             e.printStackTrace();
         }
@@ -214,11 +316,13 @@ public class MainActivity extends AppCompatActivity {
         showProgressBar(false);
         showConnectBtn(true);
         showDisconnectBtn(false);
+        showLockBtn(false);
+        showUnlockBtn(false);
     }
 
     KeyListener keyListener = new KeyListener() {
         @Override
-        public void onStateChanged(int state) {
+        public void onStateChanged(String bookingId, int state) {
             String message = KeyConstants.getMessage(state);
             Log.i(TAG, "onStateChanged: " + state + ":" + message);
             switch (state) {
@@ -265,7 +369,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onAccessError(int error) {
+        public void onAccessError(String bookingId, int error) {
             showProgressBar(false);
             String message = KeyConstants.getMessage(error);
             Log.i(TAG, "onAccessError: " + error + ":" + message);
@@ -302,8 +406,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onBookingInfo(String carNumber, long startTime, long endTime) {
-
+        public void onBookingInfo(KeyBookingInfo keyBookingInfo) {
+            Log.i(TAG, "Booking Reference:" + keyBookingInfo.getBookingRef());
+            Log.i(TAG, "Phone Number:" + keyBookingInfo.getPhoneNum());
+            Log.i(TAG, "Vehicle Number:" + keyBookingInfo.getVehicleNum());
+            Log.i(TAG, "Last Lock State:" + keyBookingInfo.getLastLockState());
+            Log.i(TAG, "Start Time:" + keyBookingInfo.getStartTime());
+            Log.i(TAG, "End Time:" + keyBookingInfo.getEndTime());
         }
     };
 
@@ -347,6 +456,13 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void showAllBtn(final boolean show) {
+        showLockBtn(show);
+        showConnectBtn(show);
+        showUnlockBtn(show);
+        showDisconnectBtn(show);
+    }
+
     private void redirectToLogin() {
         finish();
         Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
@@ -371,6 +487,17 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case RESULT_CANCELED:
                     Toast.makeText(getApplicationContext(), R.string.bt_not_enabled, Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        } else if(requestCode == REQ_LOGIN) {
+            switch (resultCode) {
+                case RESULT_OK:
+                    Toast.makeText(getApplicationContext(), R.string.booking_added, Toast.LENGTH_SHORT).show();
+                    fetchBookings();
+                    break;
+                default:
+                case RESULT_CANCELED:
+                    Toast.makeText(getApplicationContext(), R.string.booking_add_fail, Toast.LENGTH_SHORT).show();
                     break;
             }
         }

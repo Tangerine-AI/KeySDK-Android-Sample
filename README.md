@@ -33,7 +33,7 @@ Open `build.gradle` inside module that you want to use the library and simply ad
 
 ```
 dependencies {
-   implementation 'ai.tangerine:keysdk:1.0.0-beta09'
+   implementation 'ai.tangerine:keysdk:1.0.0-beta10'
 }
 ```
 
@@ -96,13 +96,13 @@ Validate your booking reference using the following method:
                 }
     
                 @Override
-                public void onBookingInfo(String carNumber, long startTime, long endTime) {
-                    showProgressBar(false);
-                    Log.i(TAG, "onBookingInfo:" + s);
-                    Log.i(TAG, "start time:" + l);
-                    Log.i(TAG, "end time:" + l1);
-                    // validation successful go for connection 
-                    connect();
+                public void onBookingInfo(KeyBookingInfo keyBookingInfo) {
+                    Log.i(TAG, "Booking Reference:" + keyBookingInfo.getBookingRef());
+                    Log.i(TAG, "Phone Number:" + keyBookingInfo.getPhoneNum());
+                    Log.i(TAG, "Vehicle Number:" + keyBookingInfo.getVehicleNum());
+                    Log.i(TAG, "Last Lock State:" + keyBookingInfo.getLastLockState());
+                    Log.i(TAG, "Start Time:" + keyBookingInfo.getStartTime());
+                    Log.i(TAG, "End Time:" + keyBookingInfo.getEndTime());
                 }
             });
         } catch (KeySdkIllegalStateException | KeySdkIllegalArgumentException e) {
@@ -114,10 +114,11 @@ Validate your booking reference using the following method:
 #### Step 5
 
 Connect to the device once validation is successful using the following method.
+You need to pass the booking reference to connect to particular vehicle.
 
 ```
         try {
-            KeySdk.connect(keyListener);
+            KeySdk.connect(bookingRef, keyListener);
         } catch (KeySdkIllegalStateException e) {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -132,6 +133,8 @@ Connect to the device once validation is successful using the following method.
 
 Lock and unlock the vehicle using the following APIs. You need to be connected before using these 2 methods. If your phone is not connected then it will throw IllegalArgumentException (“Please connect to the device before executing the command”)
 Use step 5 to connect before using the lock and unlock API.
+This will lock / unlock the currently connected vehicle.
+
 ```
 
         try {
@@ -183,24 +186,63 @@ Disconnect the device using the following API.
 
 #### Step 8
 
-logout by clearing existing booking information to start fresh.
+logout by clearing existing booking information by passing Booking Reference.
 
 ```
         try {
-            KeySdk.logout(keyListener);
+            KeySdk.logout(bookingRef, keyListener);
         } catch (KeySdkIllegalStateException | KeySdkIllegalArgumentException e) {
             e.printStackTrace();
         }
 ```
+#### Booking Information Object
 
-#### Get Booking information
+```KeyBookingInfo``` object contains  following information related to booking.
+1. Booking Reference (```keyBookingInfo.getBookingRef()```)
+2. Start Time of booking in ms (```keyBookingInfo.getStartTime()```)
+3. End Time of booking in ms (```keyBookingInfo.getEndTime()```)
+4. Last lock state (```keyBookingInfo.getLastLockState()```)
+5. Vehicle Number (```keyBookingInfo.getVehicleNum()```)
+6. Mobile Number used for booking (```keyBookingInfo.getPhoneNum()```)
 
-you can get the booking information by using below api. it will return ```null``` if booking information is not there with the sdk. if sdk has the booking info then it will return the valid ```ai.tangerine.keysdk.model.KeyBookingInfo``` object.
-```KeyBookingInfo``` object contains Booking Reference, Start Time of booking in ms, End Time of booking in ms, Vehicle Number and Mobile Number used for booking.
+
+#### Get Booking information using Booking Reference
+
+you can get the booking information for the particular Booking Reference by using below api.  
+it will return ```null``` if booking information is not there with the sdk. if sdk has the booking info then it will return the valid ```ai.tangerine.keysdk.model.KeyBookingInfo``` object.
 
 ```
         
-            KeyBookingInfo keyBookingInfo = KeySdk.getCurrentBookingInfo();
+            KeyBookingInfo keyBookingInfo = KeySdk.getBookingInfo(bookingRef);
+            if(keyBookingInfo != null) {
+                  txtBookingInfo.setText(keyBookingInfo.toString());
+            } else {
+                  txtBookingInfo.setText("null");
+            }
+        
+```
+
+#### Get All Bookings saved with sdk
+
+you can get All the Booking Information saved with sdk by using below api.  
+it will return ```null``` if booking information is not there with the sdk.  
+if sdk has the booking info then it will return the valid ```HashMap<String,KeyBookingInfo>```, where map key is **Booking Reference** and value is ```KeyBookingInfo```.
+
+```
+        
+            HashMap<String, KeyBookingInfo> bookingMap = KeySdk.getAllBookings();
+        
+```
+
+
+#### Get Last Used Booking information
+
+you can get the current booking information by using below api.  
+it will return ```null``` if booking information is not there with the sdk. if sdk has the booking info then it will return the valid ```ai.tangerine.keysdk.model.KeyBookingInfo``` object.
+
+```
+        
+            KeyBookingInfo keyBookingInfo = KeySdk.getLastBookingInfo();
             if(keyBookingInfo != null) {
                   txtBookingInfo.setText(keyBookingInfo.toString());
             } else {
@@ -221,22 +263,22 @@ you can check if device is already connected with the Jido Sense device by using
 
 #### Get last saved state
 
-you can get the last saved state of car by calling this api. If not state is saved in sdk then it will return ``` KeyConstants.STATE_LOCKED ```
+you can get the last saved state of car by calling this api for particular booking reference. If not state is saved in sdk then it will return ``` KeyConstants.STATE_LOCKED ```
 
 ```
         
-            int state = KeySdk.getLastLockStatus();
+            int state = KeySdk.getLastLockStatus(bookingRef);
         
 ```
 
 #### Validation Step
  
-Please find sample api as below for checking if booking is been validated or not. 
+Please find sample api as below for checking if booking is been validated or not for particular booking reference.
 Sample app decides whether to go to main screen or login screen based on booking validation.
 User don't have to validate the booking information again and again until it expires or modified.
 This will return true once ``` KeySdk.validateBooking(); ``` is successful.
 ```
-    KeySdk.isValidationDone();
+    KeySdk.isValidationDone(bookingRef);
 ```
 
 ```
@@ -301,6 +343,7 @@ Please find below list of state that can occur during the connection and executi
 1. We recommend to validate the booking for the first time and then save the booking information for further usage rather than validating every time you connect to the device.
 2. The sequence of usage is to ```validateBooking()``` -> save booking -> ```connect()``` -> ```lock()``` / ```unlock()```. Once the booking is validated you can skip ```validateBooking()``` until you get invalid booking error.
 3. ```lock()``` / ```unlock()``` this can be used only after ```connect()``` gets successful through ```KeyConstants.STATE_CONNECTED```.
+4. If you are connected to one vehicle and want to connect to different vehicle then please use ```disconnect()``` method before connecting to different vehicle.
 
 For more detailed implementation please refer the sample app code.
 
