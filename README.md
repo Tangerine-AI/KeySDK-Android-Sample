@@ -18,8 +18,8 @@ allprojects {
        maven {
            url "http://jfrog.tangerine.ai/artifactory/sdk-keyless"
            credentials {
-               username = "carro"
-               password = "AP52Hs1TdA7WuEr8abctKEmSujP"
+               username = "keysdk"
+               password = "AP5jtbstvra6MZ2fgYzy2NzHTsNqkjQU9NRFfZ"
            }
        }
    }
